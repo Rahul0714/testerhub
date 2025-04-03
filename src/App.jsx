@@ -1,59 +1,48 @@
 import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
-  Route,
   Routes,
+  Route,
   Navigate,
 } from "react-router-dom";
-import axios from "axios";
-import Login from "./components/Login";
-import TesterDashboard from "./components/TesterDashboard";
-import CreatorDashboard from "./components/CreatorDashboard";
-import CreatorChat from "./components/CreatorChat";
-import CreatorAddProject from "./components/CreatorAddProject";
-import CreatorProfile from "./components/CreatorProfile";
+import Home from "./pages/Home";
+import CreatorDashboard from "./pages/CreatorDashboard";
+import TesterDashboard from "./pages/TesterDashboard";
+import ChatPage from "./pages/ChatPage";
+import CreatorProfile from "./pages/CreatorProfile";
+import TesterProfile from "./pages/TesterProfile";
+import LoginPopup from "./components/LoginPopup";
+import SignupPopup from "./components/SignupPopup";
+import { jwtDecode } from "jwt-decode";
 
 function App() {
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-  }, []);
-
-  const handleLogin = async (email, password) => {
-    try {
-      const response = await axios.post("http://localhost:5000/api/login", {
-        email,
-        password,
-      });
-      if (response.data.success) {
-        setUser(response.data.user);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-      } else {
-        alert(response.data.message);
-      }
-    } catch (error) {
-      alert("Login failed");
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = jwtDecode(token);
+      setUser({ id: decoded.id, role: decoded.role });
+    } else {
+      const timer = setTimeout(() => setShowLogin(true), 5000);
+      return () => clearTimeout(timer);
     }
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+  }, []);
 
   return (
     <Router>
       <div className="min-h-screen bg-gray-100">
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route
-            path="/"
+            path="/creator"
             element={
-              !user ? (
-                <Login onLogin={handleLogin} />
+              user?.role === "creator" ? (
+                <CreatorDashboard />
               ) : (
-                <Navigate to={`/${user.role}`} />
+                <Navigate to="/" />
               )
             }
           />
@@ -61,53 +50,32 @@ function App() {
             path="/tester"
             element={
               user?.role === "tester" ? (
-                <TesterDashboard user={user} onLogout={handleLogout} />
+                <TesterDashboard />
               ) : (
                 <Navigate to="/" />
               )
             }
           />
           <Route
-            path="/creator"
-            element={
-              user?.role === "creator" ? (
-                <CreatorDashboard user={user} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
+            path="/chat/:userId/:otherUserId"
+            element={user ? <ChatPage /> : <Navigate to="/" />}
           />
-          <Route
-            path="/creator/chat/:projectId/:testerId"
-            element={
-              user?.role === "creator" ? (
-                <CreatorChat user={user} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-          <Route
-            path="/creator/add-project"
-            element={
-              user?.role === "creator" ? (
-                <CreatorAddProject user={user} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-          <Route
-            path="/creator/profile"
-            element={
-              user?.role === "creator" ? (
-                <CreatorProfile user={user} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
+          <Route path="/profile/creator/:id" element={<CreatorProfile />} />
+          <Route path="/profile/tester/:id" element={<TesterProfile />} />
         </Routes>
+        {showLogin && (
+          <LoginPopup
+            onClose={() => setShowLogin(false)}
+            onSignup={() => {
+              setShowLogin(false);
+              setShowSignup(true);
+            }}
+            setUser={setUser}
+          />
+        )}
+        {showSignup && (
+          <SignupPopup onClose={() => setShowSignup(false)} setUser={setUser} />
+        )}
       </div>
     </Router>
   );
