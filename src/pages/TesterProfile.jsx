@@ -2,86 +2,118 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
-function TesterProfile() {
+function TesterProfile({ user }) {
   const { id } = useParams();
-  const [tester, setTester] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [appliedTestings, setAppliedTestings] = useState([]);
 
   useEffect(() => {
-    const fetchTester = async () => {
-      const res = await axios.get(`http://localhost:5000/api/auth/user/${id}`);
-      setTester(res.data);
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:5000/api/auth/user/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProfile(res.data);
       const appliedRes = await axios.get(
         `http://localhost:5000/api/pattern/applied/${id}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setAppliedTestings(appliedRes.data);
     };
-    fetchTester();
+    fetchProfile();
   }, [id]);
 
-  if (!tester) return <div>Loading...</div>;
+  if (!profile) return <div>Loading...</div>;
 
   const rank =
-    tester.rewardPoints < 50
+    profile.rewardPoints < 50
       ? "Newbie"
-      : tester.rewardPoints < 100
+      : profile.rewardPoints < 100
       ? "Proficient"
-      : tester.rewardPoints < 200
+      : profile.rewardPoints < 200
       ? "Advanced"
-      : tester.rewardPoints < 300
+      : profile.rewardPoints < 300
       ? "Expert"
-      : tester.rewardPoints < 500
+      : profile.rewardPoints < 500
       ? "Elite"
       : "Master";
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Tester Profile</h1>
-      <div className="bg-white p-4 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow">
+      <div className="flex flex-col md:flex-row items-center md:items-start mb-6">
         <img
-          src={tester.profilePhoto || "default-photo.png"}
+          src={
+            profile.profilePhoto ||
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=" +
+              profile.username
+          }
           alt="Profile"
-          className="w-32 h-32 rounded-full mb-4"
+          className="w-32 h-32 rounded-full mb-4 md:mr-6 md:mb-0"
         />
-        <h2 className="text-xl font-semibold">{tester.username}</h2>
-        <p>
-          <strong>Bio:</strong> {tester.bio}
-        </p>
-        <p>
-          <strong>Email:</strong> {tester.email}
-        </p>
-        <p>
-          <strong>Skill Level:</strong> {tester.skillLevel}
-        </p>
-        <p>
-          <strong>Reward Points:</strong> {tester.rewardPoints}
-        </p>
-        <p>
-          <strong>Rank:</strong> {rank}
-        </p>
-        <h3 className="text-lg font-semibold mt-4">Portfolio</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {tester.portfolio.map((item, index) => (
-            <img
-              key={index}
-              src={item}
-              alt="Portfolio item"
-              className="w-full h-32 object-cover rounded"
-            />
-          ))}
+        <div>
+          <h2 className="text-2xl font-semibold">{profile.username}</h2>
+          <p className="text-gray-600">{profile.bio}</p>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p>
+              <span className="font-medium">Email:</span> {profile.email}
+            </p>
+            <p>
+              <span className="font-medium">Skill Level:</span>{" "}
+              {profile.skillLevel}
+            </p>
+            <p>
+              <span className="font-medium">Reward Points:</span>{" "}
+              {profile.rewardPoints}
+            </p>
+            <p>
+              <span className="font-medium">Rank:</span> {rank}
+            </p>
+          </div>
         </div>
-        <h3 className="text-lg font-semibold mt-4">Applied Testings</h3>
-        <ul className="list-disc pl-5">
-          {appliedTestings.map((test) => (
-            <li key={test._id}>
-              {test.title} by {test.creator.username} - Status:{" "}
-              {test.applicants.includes(id) ? "Pending" : "Accepted"}
-            </li>
-          ))}
-        </ul>
+      </div>
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">Applied Testings</h3>
+        {appliedTestings.length === 0 ? (
+          <p className="text-gray-600">No applications yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {appliedTestings.map((testing) => (
+              <div key={testing._id} className="border p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p>
+                      <span className="font-medium">Project:</span>{" "}
+                      {testing.title}
+                    </p>
+                    <p>
+                      <span className="font-medium">Creator:</span>{" "}
+                      {testing.creator.username}
+                    </p>
+                    <p>
+                      <span className="font-medium">Applied:</span>{" "}
+                      {new Date(testing.postedDate).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <span className="font-medium">Due:</span>{" "}
+                      {testing.completionTime}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      testing.applicants.includes(id)
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {testing.applicants.includes(id) ? "Pending" : "Accepted"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

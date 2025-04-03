@@ -1,52 +1,103 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
-function CreatorProfile() {
-  const { id } = useParams();
-  const [creator, setCreator] = useState(null);
+function CreatorProfile({ user }) {
+  const [profile, setProfile] = useState({
+    email: "",
+    bio: "",
+    contactNumber: "",
+    portfolio: [],
+  });
 
   useEffect(() => {
-    const fetchCreator = async () => {
-      const res = await axios.get(`http://localhost:5000/api/auth/user/${id}`);
-      setCreator(res.data);
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://localhost:5000/api/auth/user/${user.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setProfile(res.data);
     };
-    fetchCreator();
-  }, [id]);
+    fetchProfile();
+  }, [user.id]);
 
-  if (!creator) return <div>Loading...</div>;
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/api/auth/user/${user.id}`,
+        { bio: profile.bio, contactNumber: profile.contactNumber },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setProfile(res.data);
+      alert("Profile updated!");
+    } catch (err) {
+      alert("Failed to update profile");
+    }
+  };
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Creator Profile</h1>
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <img
-          src={creator.profilePhoto || "default-logo.png"}
-          alt="Profile"
-          className="w-32 h-32 rounded-full mb-4"
-        />
-        <h2 className="text-xl font-semibold">{creator.username}</h2>
-        <p>
-          <strong>Bio:</strong> {creator.bio}
-        </p>
-        <p>
-          <strong>Email:</strong> {creator.email}
-        </p>
-        <p>
-          <strong>Contact Number:</strong> {creator.contactNumber}
-        </p>
-        <h3 className="text-lg font-semibold mt-4">Portfolio</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {creator.portfolio.map((item, index) => (
-            <img
-              key={index}
-              src={item}
-              alt="Portfolio item"
-              className="w-full h-32 object-cover rounded"
-            />
-          ))}
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Creator Profile</h1>
+        <Link to="/creator" className="text-blue-500 hover:underline">
+          Back to Dashboard
+        </Link>
       </div>
+      <form onSubmit={handleUpdate} className="bg-white p-6 rounded shadow">
+        <div className="mb-4">
+          <label className="block text-gray-700">Email</label>
+          <input
+            type="email"
+            value={profile.email}
+            disabled
+            className="w-full p-2 border rounded bg-gray-100"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Bio</label>
+          <textarea
+            value={profile.bio || ""}
+            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+            className="w-full p-2 border rounded"
+            rows="4"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Contact Number</label>
+          <input
+            type="text"
+            value={profile.contactNumber || ""}
+            onChange={(e) =>
+              setProfile({ ...profile, contactNumber: e.target.value })
+            }
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Portfolio</label>
+          <div className="grid grid-cols-3 gap-4">
+            {profile.portfolio.map((item, index) => (
+              <img
+                key={index}
+                src={item}
+                alt="Portfolio item"
+                className="w-full h-32 object-cover rounded"
+              />
+            ))}
+          </div>
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
+        >
+          Update Profile
+        </button>
+      </form>
     </div>
   );
 }

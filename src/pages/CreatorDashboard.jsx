@@ -1,117 +1,234 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import Chat from "../components/Chat";
+import Navbar from "../components/Navbar";
 
-function CreatorDashboard() {
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("apparel");
-  const [description, setDescription] = useState("");
-  const [skillLevel, setSkillLevel] = useState("beginner");
-  const [completionTime, setCompletionTime] = useState("less than 1 week");
-  const [positions, setPositions] = useState(1);
-  const [pdf, setPdf] = useState(null);
-  const userId = localStorage.getItem("userId");
+function CreatorDashboard({ user, onLogout }) {
+  const [patterns, setPatterns] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    skillLevel: "",
+    positions: "",
+    compensation: "",
+    completionTime: "",
+  });
+  const [error, setError] = useState("");
 
-  const handleCreatePattern = async () => {
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("category", category);
-    formData.append("description", description);
-    formData.append("skillLevel", skillLevel);
-    formData.append("completionTime", completionTime);
-    formData.append("positions", positions);
-    if (pdf) formData.append("pdf", pdf);
+  useEffect(() => {
+    const fetchPatterns = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await axios.get("http://localhost:5000/api/pattern", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPatterns(res.data.filter((p) => p.creator._id === user._id));
+      } catch (err) {
+        console.error("Fetch patterns error:", err);
+      }
+    };
+    fetchPatterns();
+  }, [user._id]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const token = localStorage.getItem("token");
-    await axios.post("http://localhost:5000/api/pattern/create", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    alert("Pattern created successfully!");
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/pattern/create",
+        {
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          skillLevel: formData.skillLevel,
+          positions: parseInt(formData.positions),
+          compensation: formData.compensation,
+          completionTime: formData.completionTime,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setPatterns([...patterns, res.data]);
+      setFormData({
+        title: "",
+        description: "",
+        category: "",
+        skillLevel: "",
+        positions: "",
+        compensation: "",
+        completionTime: "",
+      });
+      setShowForm(false);
+      setError("");
+    } catch (err) {
+      console.error("Create pattern error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "Failed to create pattern");
+    }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  if (!user || user.role !== "creator") {
+    return <Navigate to="/" />;
+  }
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Creator Dashboard</h1>
-        <Link
-          to={`/profile/creator/${userId}`}
-          className="text-blue-500 hover:underline"
-        >
-          View Profile
-        </Link>
+    <div className="min-h-screen bg-gray-100">
+      <Navbar user={user} onLogout={onLogout} />
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-purple-700">Creator Studio</h1>
+          <div className="space-x-4">
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+            >
+              {showForm ? "Cancel" : "New Pattern"}
+            </button>
+            <Link
+              to={`/profile/creator/${user._id}`}
+              className="text-purple-500 hover:underline"
+            >
+              Profile
+            </Link>
+          </div>
+        </div>
+
+        {/* Pattern Creation Form */}
+        {showForm && (
+          <div className="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-purple-600">
+              Create a New Pattern
+            </h2>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Pattern Title"
+                className="col-span-2 p-2 border rounded"
+                required
+              />
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Description"
+                className="col-span-2 p-2 border rounded h-24"
+                required
+              />
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                placeholder="Category (e.g., Knitting)"
+                className="p-2 border rounded"
+                required
+              />
+              <select
+                name="skillLevel"
+                value={formData.skillLevel}
+                onChange={handleChange}
+                className="p-2 border rounded"
+                required
+              >
+                <option value="">Skill Level</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+              <input
+                type="number"
+                name="positions"
+                value={formData.positions}
+                onChange={handleChange}
+                placeholder="Positions"
+                className="p-2 border rounded"
+                required
+              />
+              <input
+                type="text"
+                name="compensation"
+                value={formData.compensation}
+                onChange={handleChange}
+                placeholder="Compensation (e.g., $50)"
+                className="p-2 border rounded"
+                required
+              />
+              <input
+                type="text"
+                name="completionTime"
+                value={formData.completionTime}
+                onChange={handleChange}
+                placeholder="Completion Time (e.g., 2 weeks)"
+                className="col-span-2 p-2 border rounded"
+                required
+              />
+              <button
+                type="submit"
+                className="col-span-2 bg-purple-600 text-white p-2 rounded hover:bg-purple-700"
+              >
+                Submit Pattern
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Pattern Management Section */}
+        <div className="bg-purple-50 p-6 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-4 text-purple-700">
+            Your Pattern Projects
+          </h2>
+          {patterns.length === 0 ? (
+            <p className="text-gray-600">
+              No patterns created yet. Start by adding one!
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {patterns.map((pattern) => (
+                <div
+                  key={pattern._id}
+                  className="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500"
+                >
+                  <h3 className="text-lg font-bold text-purple-600">
+                    {pattern.title}
+                  </h3>
+                  <p className="text-gray-700">{pattern.description}</p>
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>Category: {pattern.category}</p>
+                    <p>Skill: {pattern.skillLevel}</p>
+                    <p>
+                      Status: {pattern.applicants.length}/{pattern.positions}{" "}
+                      testers
+                    </p>
+                  </div>
+                  <div className="mt-4 flex space-x-2">
+                    <Link
+                      to={`/chat/${pattern._id}/${
+                        pattern.applicants[0] || user._id
+                      }`}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    >
+                      Chat
+                    </Link>
+                    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300">
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl mb-4">Create a New Pattern</h2>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Pattern Title"
-          className="w-full p-2 mb-4 border"
-        />
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-2 mb-4 border"
-        >
-          <option value="apparel">Apparel</option>
-          <option value="home-decor">Home Decor</option>
-          <option value="accessories">Accessories</option>
-          <option value="baby-kids">Baby/Kids</option>
-          <option value="pet-items">Pet Items</option>
-          <option value="holiday-seasonal">Holiday/Seasonal</option>
-          <option value="other">Other</option>
-        </select>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description"
-          className="w-full p-2 mb-4 border"
-        />
-        <select
-          value={skillLevel}
-          onChange={(e) => setSkillLevel(e.target.value)}
-          className="w-full p-2 mb-4 border"
-        >
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </select>
-        <select
-          value={completionTime}
-          onChange={(e) => setCompletionTime(e.target.value)}
-          className="w-full p-2 mb-4 border"
-        >
-          <option value="less than 1 week">Less than 1 week</option>
-          <option value="1-2 months">1-2 months</option>
-          <option value="2-4 months">2-4 months</option>
-          <option value="flexible">Flexible</option>
-        </select>
-        <input
-          type="number"
-          value={positions}
-          onChange={(e) => setPositions(e.target.value)}
-          placeholder="Positions"
-          className="w-full p-2 mb-4 border"
-        />
-        <input
-          type="file"
-          onChange={(e) => setPdf(e.target.files[0])}
-          className="mb-4"
-        />
-        <button
-          onClick={handleCreatePattern}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Create Pattern
-        </button>
-      </div>
-      <Chat userId={userId} receiverId="testerId" />{" "}
-      {/* Replace with dynamic tester ID */}
     </div>
   );
 }
