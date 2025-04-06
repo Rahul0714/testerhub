@@ -16,6 +16,7 @@ function CreatorDashboard({ user, onLogout }) {
     completionTime: "",
   });
   const [error, setError] = useState("");
+  console.log(user);
 
   useEffect(() => {
     const fetchPatterns = async () => {
@@ -90,12 +91,6 @@ function CreatorDashboard({ user, onLogout }) {
             >
               {showForm ? "Cancel" : "New Pattern"}
             </button>
-            <Link
-              to={`/profile/creator/${user._id}`}
-              className="text-purple-500 hover:underline"
-            >
-              Profile
-            </Link>
           </div>
         </div>
 
@@ -212,16 +207,19 @@ function CreatorDashboard({ user, onLogout }) {
                   </div>
                   <div className="mt-4 flex space-x-2">
                     <Link
-                      to={`/chat/${pattern._id}/${
-                        pattern.applicants[0] || user._id
+                      to={`/chat/${pattern.creator._id}/${
+                        pattern.applicants[0]._id || user._id
                       }`}
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     >
                       Chat
                     </Link>
-                    <button className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300">
-                      Edit
-                    </button>
+                    <Link
+                      className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300"
+                      to={`/creator/patterns/${pattern._id}/applicants`}
+                    >
+                      Testers
+                    </Link>
                   </div>
                 </div>
               ))}

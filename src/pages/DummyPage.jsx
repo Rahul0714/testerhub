@@ -3,9 +3,10 @@ import axios from "axios";
 import Navbar from "../components/Navbar";
 import Filters from "../components/Filters";
 import PatternList from "../components/PatternList";
-import ChatModal from "../components/ChatModal";
 
-function Home({ user, onLogout }) {
+function DummyPage () {
+//   const onLogout = () => {};
+  const user = null;
   const [patterns, setPatterns] = useState([]);
   const [filters, setFilters] = useState({
     skillLevel: [],
@@ -13,7 +14,6 @@ function Home({ user, onLogout }) {
     completionTime: [],
   });
   const [selectedPattern, setSelectedPattern] = useState(null);
-
   useEffect(() => {
     const fetchPatterns = async () => {
       const res = await axios.get("http://localhost:5000/api/pattern");
@@ -38,7 +38,7 @@ function Home({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar user={user} onLogout={onLogout} />
+      {/* <Navbar user={user} onLogout={onLogout} /> */}
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
         <div className="md:w-1/4">
           <Filters onFilterChange={handleFilterChange} />
@@ -54,13 +54,8 @@ function Home({ user, onLogout }) {
           />
         </div>
       </div>
-      <ChatModal
-        isOpen={!!selectedPattern}
-        onClose={() => setSelectedPattern(null)}
-        pattern={selectedPattern}
-      />
     </div>
   );
-}
+};
 
-export default Home;
+export default DummyPage;

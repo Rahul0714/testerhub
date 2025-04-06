@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function CreatorAddProject({ user }) {
+function CreatorAddpattern({ user }) {
   const navigate = useNavigate();
-  const [project, setProject] = useState({
+  const [pattern, setpattern] = useState({
     title: "",
     category: "",
     description: "",
@@ -18,14 +18,14 @@ function CreatorAddProject({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("title", project.title);
-    formData.append("category", project.category);
-    formData.append("description", project.description);
-    formData.append("skillLevel", project.skillLevel);
-    formData.append("completionTime", project.completionTime);
-    formData.append("positions", project.positions);
-    formData.append("compensation", project.compensation);
-    if (project.pdf) formData.append("pdf", project.pdf);
+    formData.append("title", pattern.title);
+    formData.append("category", pattern.category);
+    formData.append("description", pattern.description);
+    formData.append("skillLevel", pattern.skillLevel);
+    formData.append("completionTime", pattern.completionTime);
+    formData.append("positions", pattern.positions);
+    formData.append("compensation", pattern.compensation);
+    if (pattern.pdf) formData.append("pdf", pattern.pdf);
 
     try {
       const token = localStorage.getItem("token");
@@ -55,8 +55,8 @@ function CreatorAddProject({ user }) {
           <label className="block text-gray-700">Title</label>
           <input
             type="text"
-            value={project.title}
-            onChange={(e) => setProject({ ...project, title: e.target.value })}
+            value={pattern.title}
+            onChange={(e) => setpattern({ ...pattern, title: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />
@@ -64,9 +64,9 @@ function CreatorAddProject({ user }) {
         <div className="mb-4">
           <label className="block text-gray-700">Category</label>
           <select
-            value={project.category}
+            value={pattern.category}
             onChange={(e) =>
-              setProject({ ...project, category: e.target.value })
+              setpattern({ ...pattern, category: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -84,9 +84,9 @@ function CreatorAddProject({ user }) {
         <div className="mb-4">
           <label className="block text-gray-700">Description</label>
           <textarea
-            value={project.description}
+            value={pattern.description}
             onChange={(e) =>
-              setProject({ ...project, description: e.target.value })
+              setpattern({ ...pattern, description: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -95,9 +95,9 @@ function CreatorAddProject({ user }) {
         <div className="mb-4">
           <label className="block text-gray-700">Skill Level</label>
           <select
-            value={project.skillLevel}
+            value={pattern.skillLevel}
             onChange={(e) =>
-              setProject({ ...project, skillLevel: e.target.value })
+              setpattern({ ...pattern, skillLevel: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -111,9 +111,9 @@ function CreatorAddProject({ user }) {
         <div className="mb-4">
           <label className="block text-gray-700">Completion Time</label>
           <select
-            value={project.completionTime}
+            value={pattern.completionTime}
             onChange={(e) =>
-              setProject({ ...project, completionTime: e.target.value })
+              setpattern({ ...pattern, completionTime: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -129,9 +129,9 @@ function CreatorAddProject({ user }) {
           <label className="block text-gray-700">Testers Needed</label>
           <input
             type="number"
-            value={project.positions}
+            value={pattern.positions}
             onChange={(e) =>
-              setProject({ ...project, positions: e.target.value })
+              setpattern({ ...pattern, positions: e.target.value })
             }
             className="w-full p-2 border rounded"
             min="1"
@@ -142,9 +142,9 @@ function CreatorAddProject({ user }) {
           <label className="block text-gray-700">Compensation</label>
           <input
             type="text"
-            value={project.compensation}
+            value={pattern.compensation}
             onChange={(e) =>
-              setProject({ ...project, compensation: e.target.value })
+              setpattern({ ...pattern, compensation: e.target.value })
             }
             className="w-full p-2 border rounded"
             placeholder="e.g., Free pattern + 10 points"
@@ -156,7 +156,7 @@ function CreatorAddProject({ user }) {
           <input
             type="file"
             accept="application/pdf"
-            onChange={(e) => setProject({ ...project, pdf: e.target.files[0] })}
+            onChange={(e) => setpattern({ ...pattern, pdf: e.target.files[0] })}
             className="w-full"
           />
         </div>
@@ -171,4 +171,4 @@ function CreatorAddProject({ user }) {
   );
 }
 
-export default CreatorAddProject;
+export default CreatorAddpattern;
