@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Navbar from "../components/Navbar";
 import Filters from "../components/Filters";
 import PatternList from "../components/PatternList";
 import ChatModal from "../components/ChatModal";
@@ -38,7 +37,6 @@ function TesterDashboard({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar user={user} onLogout={onLogout} />
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
         <div className="md:w-1/4">
           <Filters onFilterChange={handleFilterChange} />

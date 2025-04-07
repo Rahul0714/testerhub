@@ -17,6 +17,7 @@ import CreatorApplicants from "./components/CreatorApplicants";
 import DummyPage from "./pages/DummyPage";
 import CreatorPatterns from "./pages/CreatorPatterns";
 import PatternList from "./components/PatternList";
+import Navbar from "./components/Navbar";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -83,8 +84,14 @@ function App() {
 
   return (
     <Router>
+      <Navbar
+        user={user}
+        onLogout={handleLogout}
+        isOpen={showLogin && !user}
+        onClose={() => setShowLogin(false)}
+        onLogin={handleLogin}
+      />
       <div className="min-h-screen bg-gray-100">
-        {/* <Navbar user={user} onLogout={handleLogout} /> */}
         {loading ? (
           <div className="flex justify-center items-center h-screen">
             <p className="text-gray-600">Loading...</p>
@@ -126,6 +133,7 @@ function App() {
                   )
                 }
               />
+
               <Route
                 path="/creator/patterns/:patternId/applicants"
                 element={

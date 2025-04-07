@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import Navbar from "../components/Navbar";
 
 function CreatorDashboard({ user, onLogout }) {
   const [patterns, setPatterns] = useState([]);
@@ -17,7 +16,7 @@ function CreatorDashboard({ user, onLogout }) {
   });
   const [error, setError] = useState("");
   console.log(user);
-
+  console.log(patterns);
   useEffect(() => {
     const fetchPatterns = async () => {
       const token = localStorage.getItem("token");
@@ -80,7 +79,6 @@ function CreatorDashboard({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar user={user} onLogout={onLogout} />
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-purple-700">Creator Studio</h1>
@@ -207,8 +205,8 @@ function CreatorDashboard({ user, onLogout }) {
                   </div>
                   <div className="mt-4 flex space-x-2">
                     <Link
-                      to={`/chat/${pattern.creator._id}/${
-                        pattern.applicants[0]._id || user._id
+                      to={`/chat/${pattern.creator?._id}/${
+                        pattern?.applicants[0]?._id || user?._id
                       }`}
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     >
