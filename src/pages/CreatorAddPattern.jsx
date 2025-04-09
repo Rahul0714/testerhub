@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function CreatorAddpattern({ user }) {
+function CreatorAddPattern({ user }) {
   const navigate = useNavigate();
-  const [pattern, setpattern] = useState({
+  const [pattern, setPattern] = useState({
     title: "",
     category: "",
     description: "",
@@ -38,6 +38,7 @@ function CreatorAddpattern({ user }) {
       alert("Pattern added successfully!");
       navigate("/creator");
     } catch (error) {
+      console.error("Error adding pattern:", error);
       alert("Failed to add pattern");
     }
   };
@@ -56,7 +57,7 @@ function CreatorAddpattern({ user }) {
           <input
             type="text"
             value={pattern.title}
-            onChange={(e) => setpattern({ ...pattern, title: e.target.value })}
+            onChange={(e) => setPattern({ ...pattern, title: e.target.value })}
             className="w-full p-2 border rounded"
             required
           />
@@ -66,18 +67,18 @@ function CreatorAddpattern({ user }) {
           <select
             value={pattern.category}
             onChange={(e) =>
-              setpattern({ ...pattern, category: e.target.value })
+              setPattern({ ...pattern, category: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
           >
             <option value="">Select Category</option>
             <option value="apparel">Apparel</option>
-            <option value="home-decor">Home Decor</option>
+            <option value="home decor">Home Decor</option>
             <option value="accessories">Accessories</option>
-            <option value="baby-kids">Baby/Kids</option>
-            <option value="pet-items">Pet Items</option>
-            <option value="holiday-seasonal">Holiday/Seasonal</option>
+            <option value="baby/kids">Baby/Kids</option>
+            <option value="pet items">Pet Items</option>
+            <option value="holiday/seasonal">Holiday/Seasonal</option>
             <option value="other">Other</option>
           </select>
         </div>
@@ -86,7 +87,7 @@ function CreatorAddpattern({ user }) {
           <textarea
             value={pattern.description}
             onChange={(e) =>
-              setpattern({ ...pattern, description: e.target.value })
+              setPattern({ ...pattern, description: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -97,7 +98,7 @@ function CreatorAddpattern({ user }) {
           <select
             value={pattern.skillLevel}
             onChange={(e) =>
-              setpattern({ ...pattern, skillLevel: e.target.value })
+              setPattern({ ...pattern, skillLevel: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -113,7 +114,7 @@ function CreatorAddpattern({ user }) {
           <select
             value={pattern.completionTime}
             onChange={(e) =>
-              setpattern({ ...pattern, completionTime: e.target.value })
+              setPattern({ ...pattern, completionTime: e.target.value })
             }
             className="w-full p-2 border rounded"
             required
@@ -131,7 +132,7 @@ function CreatorAddpattern({ user }) {
             type="number"
             value={pattern.positions}
             onChange={(e) =>
-              setpattern({ ...pattern, positions: e.target.value })
+              setPattern({ ...pattern, positions: e.target.value })
             }
             className="w-full p-2 border rounded"
             min="1"
@@ -144,7 +145,7 @@ function CreatorAddpattern({ user }) {
             type="text"
             value={pattern.compensation}
             onChange={(e) =>
-              setpattern({ ...pattern, compensation: e.target.value })
+              setPattern({ ...pattern, compensation: e.target.value })
             }
             className="w-full p-2 border rounded"
             placeholder="e.g., Free pattern + 10 points"
@@ -156,7 +157,7 @@ function CreatorAddpattern({ user }) {
           <input
             type="file"
             accept="application/pdf"
-            onChange={(e) => setpattern({ ...pattern, pdf: e.target.files[0] })}
+            onChange={(e) => setPattern({ ...pattern, pdf: e.target.files[0] })}
             className="w-full"
           />
         </div>
@@ -171,4 +172,4 @@ function CreatorAddpattern({ user }) {
   );
 }
 
-export default CreatorAddpattern;
+export default CreatorAddPattern;

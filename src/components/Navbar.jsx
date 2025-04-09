@@ -55,6 +55,13 @@ function Navbar({ user, onLogout }) {
               >
                 Profile
               </button>
+              <button
+                onClick={() => navigate("/recommendations")}
+                className="hover:underline"
+              >
+                Recommendations
+              </button>{" "}
+              {/* Added Recommendations */}
             </>
           )}
           {user ? (

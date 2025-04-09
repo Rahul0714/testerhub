@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Filters = ({ onFilterChange }) => {
   const [filters, setFilters] = useState({
@@ -7,15 +7,18 @@ const Filters = ({ onFilterChange }) => {
     completionTime: [],
   });
 
+  useEffect(() => {
+    onFilterChange(filters);
+    console.log("Filters applied:", filters); // Debugging
+  }, [filters, onFilterChange]);
+
   const handleCheckboxChange = (e, filterType) => {
     const { value, checked } = e.target;
     setFilters((prev) => {
       const newFilter = checked
         ? [...prev[filterType], value]
         : prev[filterType].filter((item) => item !== value);
-      const updatedFilters = { ...prev, [filterType]: newFilter };
-      onFilterChange(updatedFilters);
-      return updatedFilters;
+      return { ...prev, [filterType]: newFilter };
     });
   };
 

@@ -4,7 +4,6 @@ import Filters from "../components/Filters";
 import PatternList from "../components/PatternList";
 
 function DummyPage() {
-  //   const onLogout = () => {};
   const user = null;
   const [patterns, setPatterns] = useState([]);
   const [filters, setFilters] = useState({
@@ -13,10 +12,16 @@ function DummyPage() {
     completionTime: [],
   });
   const [selectedPattern, setSelectedPattern] = useState(null);
+
   useEffect(() => {
     const fetchPatterns = async () => {
-      const res = await axios.get("http://localhost:5000/api/pattern");
-      setPatterns(res.data);
+      try {
+        const res = await axios.get("http://localhost:5000/api/pattern");
+        console.log("Fetched patterns:", res.data); // Debugging
+        setPatterns(res.data);
+      } catch (error) {
+        console.error("Error fetching patterns:", error);
+      }
     };
     fetchPatterns();
   }, []);
@@ -25,15 +30,25 @@ function DummyPage() {
     setFilters(newFilters);
   };
 
-  const filteredPatterns = patterns.filter(
-    (pattern) =>
-      (filters.skillLevel.length === 0 ||
-        filters.skillLevel.includes(pattern.skillLevel)) &&
-      (filters.category.length === 0 ||
-        filters.category.includes(pattern.category)) &&
-      (filters.completionTime.length === 0 ||
-        filters.completionTime.includes(pattern.completionTime))
-  );
+  const filteredPatterns = patterns.filter((pattern) => {
+    const skillMatch =
+      filters.skillLevel.length === 0 ||
+      filters.skillLevel.some((level) =>
+        pattern.skillLevel?.toLowerCase().includes(level)
+      );
+    const categoryMatch =
+      filters.category.length === 0 ||
+      filters.category.some((cat) =>
+        pattern.category?.toLowerCase().includes(cat)
+      );
+    const timeMatch =
+      filters.completionTime.length === 0 ||
+      filters.completionTime.some((time) =>
+        pattern.completionTime?.toLowerCase().includes(time)
+      );
+
+    return skillMatch && categoryMatch && timeMatch;
+  });
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -54,6 +69,6 @@ function DummyPage() {
       </div>
     </div>
   );
-};
+}
 
 export default DummyPage;

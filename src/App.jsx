@@ -18,6 +18,7 @@ import DummyPage from "./pages/DummyPage";
 import CreatorPatterns from "./pages/CreatorPatterns";
 import PatternList from "./components/PatternList";
 import Navbar from "./components/Navbar";
+import Recommendations from "./components/Recommendations";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -133,7 +134,7 @@ function App() {
                   )
                 }
               />
-
+              <Route path="/recommendations" element={<Recommendations />} />
               <Route
                 path="/creator/patterns/:patternId/applicants"
                 element={
